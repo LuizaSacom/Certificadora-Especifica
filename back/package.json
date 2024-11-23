@@ -1,0 +1,24 @@
+{
+  "name": "back",
+  "version": "1.0.0",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist/**"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Luiza Matilha Sacom, Italo Francisco Magdalena, Felipe Martins Lucio e Denis Rodrigues Rocha",
+  "license": "ISC",
+  "description": "Back end application of the specific competence certification project",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "moongose": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0"
+  }
+}
