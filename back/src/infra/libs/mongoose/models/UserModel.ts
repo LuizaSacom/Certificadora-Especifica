@@ -29,7 +29,7 @@ const userSchema = new Schema(
       type: String,
       required: true,
     },
-    activies: [activeSchema],
+    actives: [activeSchema],
   },
   { timestamps: true }
 );

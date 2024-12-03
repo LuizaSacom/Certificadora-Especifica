@@ -1,5 +1,5 @@
-import mongoose, { Document, ObjectId, Schema } from "mongoose";
-import { environments } from "../../../../constants/environments";
+import { Schema } from "mongoose";
+import { activeHistorySchema } from "./ActiveHistoryModel";
 
 export enum ActiveTypeSchema {
   LCA = "LCA",
@@ -10,43 +10,6 @@ export enum ActiveTypeSchema {
   TREASURY = "TREASURY",
   OTHER = "OTHER",
 }
-
-export type ActiveHistorySchema = {
-  id: ObjectId;
-  value: number;
-  variation: number;
-  incomeDate: Date;
-};
-
-export type ActiveSchema = {
-  id: ObjectId;
-  type: ActiveTypeSchema;
-  title: string;
-  shares: number;
-  balance: number;
-  variation: number;
-  value_per_share: number;
-};
-
-const activeHistorySchema = new Schema({
-  id: {
-    type: Schema.Types.ObjectId,
-    required: true,
-  },
-  value: {
-    type: Number,
-    required: true,
-  },
-  variation: {
-    type: Number,
-    required: true,
-  },
-  incomeDate: {
-    type: Date,
-    default: Date.now,
-    required: true,
-  },
-});
 
 export const activeSchema = new Schema(
   {
