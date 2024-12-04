@@ -1,6 +1,5 @@
-import mongoose, { Document, ObjectId, Schema } from "mongoose";
-import { environments } from "../../../../constants/environments";
 import { activeSchema } from "./ActiveModel";
+import mongoose, { Document, ObjectId, Schema } from "mongoose";
 
 export type UserSchema = {
   id: ObjectId;
@@ -13,10 +12,6 @@ export type UserSchema = {
 
 const userSchema = new Schema(
   {
-    id: {
-      type: Schema.Types.ObjectId,
-      required: true,
-    },
     username: {
       type: String,
       required: true,
@@ -42,6 +37,7 @@ userSchema.set("toJSON", {
   },
 });
 
-export const AccessKeyModel = mongoose.connection
-  .useDb(environments.DATABASE)
-  .model<UserSchema>("user", userSchema);
+export const UserModel = mongoose.connection.model<UserSchema>(
+  "user",
+  userSchema
+);
