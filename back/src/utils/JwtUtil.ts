@@ -10,6 +10,7 @@ export type JwtPayload = {
 
 export const decoteToken = (token: string): JwtPayload => {
   const decodedToken = jwt.verify(token, environments.JWT_SECRET);
+
   if (typeof decodedToken === "object") {
     const username = decodedToken.username;
     const userId = decodedToken.userId;
