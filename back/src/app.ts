@@ -1,8 +1,8 @@
 import express from "express";
 import mongoose from "mongoose";
 import { environments } from "./constants/environments";
-import { userRoutes } from "./presentation/routes/UserRoutes";
 import { login } from "./presentation/controllers/AuthController";
+import { register } from "./presentation/controllers/UserController";
 
 const app = express();
 
@@ -16,7 +16,7 @@ mongoose
   });
 
 app.use(express.json());
-app.use("/users", userRoutes);
+app.post("/users", register);
 app.post("/login", login);
 
 app.listen(environments.PORT, () => {
