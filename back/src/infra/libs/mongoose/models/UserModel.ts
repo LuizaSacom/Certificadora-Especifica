@@ -1,11 +1,12 @@
-import { activeSchema } from "./ActiveModel";
+import { ActiveSchema, activeSchema } from "./ActiveModel";
 import mongoose, { Document, ObjectId, Schema } from "mongoose";
 
 export type UserSchema = {
   id: ObjectId;
+  salt: string;
+  actives: ActiveSchema[];
   username: string;
   password: string;
-  salt: string;
   createdAt: string;
   updatedAt: string;
 } & Document;
@@ -24,7 +25,11 @@ const userSchema = new Schema(
       type: String,
       required: true,
     },
-    actives: [activeSchema],
+    actives: {
+      type: [activeSchema],
+      default: [],
+      required: true,
+    },
   },
   { timestamps: true }
 );

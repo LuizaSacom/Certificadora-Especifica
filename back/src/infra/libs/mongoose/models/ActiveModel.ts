@@ -1,17 +1,27 @@
-import { Schema } from "mongoose";
-import { activeHistorySchema } from "./ActiveHistoryModel";
+import { Document, Schema } from "mongoose";
+import { ActiveHistorySchema, activeHistorySchema } from "./ActiveHistoryModel";
 
 export enum ActiveTypeSchema {
-  LCA = "LCA",
-  LCI = "LCI",
-  LF = "LF",
-  CDB = "CDB",
-  FII = "FII",
-  TREASURY = "TREASURY",
+  FFI = "FFI",
+  EFT = "EFT",
   OTHER = "OTHER",
+  ACTION = "ACTION",
+  CRIPTO = "CRIPTO",
+  FIXED_INCOME = "FIXED_INCOME",
 }
 
-export const activeSchema = new Schema(
+export type ActiveSchema = {
+  id: Schema.Types.ObjectId;
+  type: ActiveTypeSchema;
+  title: string;
+  shares: number;
+  balance: number;
+  variation: number;
+  value_per_share: number;
+  history: ActiveHistorySchema[];
+};
+
+export const activeSchema = new Schema<ActiveSchema>(
   {
     id: {
       type: Schema.Types.ObjectId,
@@ -41,7 +51,11 @@ export const activeSchema = new Schema(
       type: Number,
       required: true,
     },
-    history: [activeHistorySchema],
+    history: {
+      type: [activeHistorySchema],
+      default: [],
+      required: true,
+    },
   },
   { timestamps: true }
 );

@@ -1,6 +1,13 @@
-import { Schema } from "mongoose";
+import { Document, Schema } from "mongoose";
 
-export const activeHistorySchema = new Schema({
+export type ActiveHistorySchema = {
+  id: Schema.Types.ObjectId;
+  value: number;
+  variation: number;
+  incomeDate: Date;
+};
+
+export const activeHistorySchema = new Schema<ActiveHistorySchema>({
   id: {
     type: Schema.Types.ObjectId,
     required: true,
