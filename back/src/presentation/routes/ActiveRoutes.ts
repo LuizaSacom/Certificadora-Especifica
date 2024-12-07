@@ -1,15 +1,21 @@
 import express from "express";
-import { register } from "../controllers/UserController";
 import { authMiddleware } from "../middlewares/AuthMiddleware";
+import {
+  deleteActive,
+  summary,
+  upsertActive,
+} from "../controllers/ActiveController";
 
 export const activeRoutes = express.Router();
 
 activeRoutes.use(authMiddleware);
 
-activeRoutes.post("/", register);
+activeRoutes.get("/", summary);
 
-// activeRoutes.delete("/:id", register);
+activeRoutes.put("/:id", upsertActive);
 
-// activeRoutes.get("/summary", register);
+activeRoutes.post("/", upsertActive);
+
+activeRoutes.delete("/:id", deleteActive);
 
 // activeRoutes.get("/:id/history", register);

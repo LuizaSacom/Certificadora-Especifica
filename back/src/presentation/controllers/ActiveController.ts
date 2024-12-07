@@ -1,11 +1,7 @@
 import { Request, Response } from "express";
 import { UserModel } from "../../infra/libs/mongoose/models/UserModel";
-import { generetaToken } from "../../utils/JwtUtil";
-import { Document, ObjectId, Schema } from "mongoose";
-import {
-  ActiveSchema,
-  ActiveTypeSchema,
-} from "../../infra/libs/mongoose/models/ActiveModel";
+import { Schema } from "mongoose";
+import { ActiveTypeSchema } from "../../infra/libs/mongoose/models/ActiveModel";
 import { ActiveHistorySchema } from "../../infra/libs/mongoose/models/ActiveHistoryModel";
 
 const getActiveTypeByString = (type: string): ActiveTypeSchema => {
@@ -26,7 +22,58 @@ const getActiveTypeByString = (type: string): ActiveTypeSchema => {
   }
 };
 
-export const registerActive = async (
+export const summary = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const user = await UserModel.findOne({ username: req.headers.username });
+    if (!user) {
+      res.status(401).json({ error: "Usuário não encontrado." });
+      return;
+    }
+
+    res.status(200).json(user.actives);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Erro no servidor." });
+  }
+};
+
+export const deleteActive = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { id } = req.body;
+
+    if (!id) {
+      res.status(400).json({
+        error: "Id é  obrigatório para deletar a atividade.",
+      });
+
+      return;
+    }
+    const user = await UserModel.findOne({ username: req.headers.username });
+    if (!user) {
+      res.status(401).json({ error: "Usuário não encontrado." });
+      return;
+    }
+
+    const activeIndex = user.actives.findIndex((active) => active.id === id);
+    if (activeIndex === -1) {
+      res.status(404).json({ error: "Ativo não encontrado." });
+      return;
+    }
+
+    user.actives.splice(activeIndex, 1);
+    await user.save();
+
+    res.status(200);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Erro no servidor." });
+  }
+};
+
+export const upsertActive = async (
   req: Request,
   res: Response
 ): Promise<void> => {
@@ -46,6 +93,32 @@ export const registerActive = async (
       return;
     }
 
+    if (!id && req.method === "PUT") {
+      res
+        .status(400)
+        .json({ error: "Id é obrigatório para atualizar o ativo." });
+      return;
+    }
+
+    if (id) {
+      const activeIndex = user.actives.findIndex((active) => active.id === id);
+
+      if (activeIndex === -1) {
+        res.status(404).json({ error: "Ativo não encontrado." });
+        return;
+      }
+
+      user.actives[activeIndex].title = title;
+      user.actives[activeIndex].type = getActiveTypeByString(type);
+      user.actives[activeIndex].shares = shares;
+      user.actives[activeIndex].balance = shares * value_per_share;
+      user.actives[activeIndex].value_per_share = value_per_share;
+
+      await user.save();
+      res.status(200).json(user.actives[activeIndex]);
+      return;
+    }
+
     const newActive = {
       id: new Schema.Types.ObjectId(""),
       type: getActiveTypeByString(type),
@@ -58,6 +131,7 @@ export const registerActive = async (
     };
 
     user.actives.push(newActive);
+    await user.save();
 
     res.status(201).json(newActive);
   } catch (err) {
