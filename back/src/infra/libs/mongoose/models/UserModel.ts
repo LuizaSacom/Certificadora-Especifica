@@ -1,8 +1,8 @@
 import { ActiveSchema, activeSchema } from "./ActiveModel";
-import mongoose, { Document, ObjectId, Schema } from "mongoose";
+import mongoose, { Document, Schema } from "mongoose";
 
 export type UserSchema = {
-  id: ObjectId;
+  id: Schema.Types.ObjectId;
   salt: string;
   actives: ActiveSchema[];
   username: string;
@@ -16,6 +16,7 @@ const userSchema = new Schema(
     username: {
       type: String,
       required: true,
+      unique: true,
     },
     password: {
       type: String,
@@ -39,6 +40,16 @@ userSchema.set("toJSON", {
     ret.id = ret._id;
     delete ret.__v;
     delete ret._id;
+
+    ret.active = ret.actives.map((active: any) => {
+      active.id = active._id;
+      delete active._id;
+
+      active.history = active.history.map((history: any) => {
+        history.id = history._id;
+        delete history._id;
+      });
+    });
   },
 });
 

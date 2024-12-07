@@ -8,11 +8,13 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
     if (!username || !password) {
       res.status(400).json({ error: "Username e senha são obrigatórios." });
+      return;
     }
 
     const existingUser = await UserModel.findOne({ username });
     if (existingUser) {
       res.status(400).json({ error: "O nome de usuário já está em uso." });
+      return;
     }
 
     const hashedPassword = await argon2.hash(password);

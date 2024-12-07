@@ -1,4 +1,4 @@
-import { Document, Schema } from "mongoose";
+import { Schema, Types } from "mongoose";
 import { ActiveHistorySchema, activeHistorySchema } from "./ActiveHistoryModel";
 
 export enum ActiveTypeSchema {
@@ -11,7 +11,7 @@ export enum ActiveTypeSchema {
 }
 
 export type ActiveSchema = {
-  id: Schema.Types.ObjectId;
+  _id?: string;
   type: ActiveTypeSchema;
   title: string;
   shares: number;
@@ -23,10 +23,6 @@ export type ActiveSchema = {
 
 export const activeSchema = new Schema<ActiveSchema>(
   {
-    id: {
-      type: Schema.Types.ObjectId,
-      required: true,
-    },
     type: {
       type: String,
       required: true,

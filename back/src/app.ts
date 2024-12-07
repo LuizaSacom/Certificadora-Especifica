@@ -8,7 +8,9 @@ import { activeRoutes } from "./presentation/routes/ActiveRoutes";
 const app = express();
 
 mongoose
-  .connect(environments.MONGO_URL)
+  .connect(environments.MONGO_URL, {
+    dbName: environments.DB_NAME,
+  })
   .then(() => {
     console.log("Conectado ao MongoDB!");
   })
