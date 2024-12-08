@@ -7,6 +7,14 @@ import {
 } from "../../infra/libs/mongoose/models/ActiveModel";
 import { ActiveHistorySchema } from "../../infra/libs/mongoose/models/ActiveHistoryModel";
 
+// TODO: Criar função para cadastro do histórico do ativo
+// Essa função de calcular a variação do histórico em relação ao seu anterior (se tive)
+// Essa função deve ser generica, para que a rota de criação/update do ativo possam receber o histórico
+
+// TODO: Ajustar calculo do total do ativo baseando-se no histórico
+// Esse valor deve ser calculado baseando-se no total de registros histórico do ativo
+// Se for 0, considerar o valor do ativo
+
 const getActiveTypeByString = (type: string): ActiveTypeSchema => {
   switch (type.toUpperCase()) {
     case "FFI":
@@ -164,5 +172,249 @@ export const createActive = async (
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Erro no servidor." });
+  }
+};
+
+export const createActiveHistory = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const activeId = req.params["id"];
+    const { value, incomeDate } = req.body;
+
+    if (!activeId) {
+      res.status(400).json({
+        error: "O id da atividade obrigatório.",
+      });
+      return;
+    }
+
+    if (!value || !incomeDate) {
+      res.status(400).json({
+        error: "O valor e data do histórico são obrigatórios.",
+      });
+      return;
+    }
+
+    const history = await upsertActiveHistory({
+      username: req.headers.username as string,
+      activeId: activeId,
+      history: {
+        value: value as number,
+        variation: 0,
+        incomeDate: new Date(incomeDate),
+      },
+    });
+
+    res.status(201).json(history);
+  } catch (err) {
+    if (err instanceof Error) {
+      console.error(err);
+      res.status(500).json({ error: err });
+      return;
+    }
+
+    console.error(err);
+    res.status(500).json({ error: "Erro no servidor." });
+  }
+};
+
+export const updateActiveHistory = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const activeId = req.params["activeId"];
+    const historyId = req.params["historyId"];
+    const { value, incomeDate } = req.body;
+
+    if (!activeId) {
+      res.status(400).json({
+        error: "O id da atividade obrigatório.",
+      });
+      return;
+    }
+
+    if (!historyId) {
+      res.status(400).json({
+        error: "O id do histório é obrigatório.",
+      });
+      return;
+    }
+
+    if (!value || !incomeDate) {
+      res.status(400).json({
+        error: "O valor e data do histórico são obrigatórios.",
+      });
+      return;
+    }
+
+    const history = await upsertActiveHistory({
+      username: req.headers.username as string,
+      activeId: activeId,
+      history: {
+        _id: historyId,
+        value: value as number,
+        variation: 0,
+        incomeDate: new Date(incomeDate),
+      },
+    });
+
+    res.status(201).json(history);
+  } catch (err) {
+    if (err instanceof Error) {
+      console.error(err);
+      res.status(500).json({ error: err });
+      return;
+    }
+
+    console.error(err);
+    res.status(500).json({ error: "Erro no servidor." });
+  }
+};
+
+export const deleteActiveHistory = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const activeId = req.params["activeId"];
+    const historyId = req.params["historyId"];
+
+    if (!activeId) {
+      res.status(400).json({
+        error: "O id da atividade obrigatório.",
+      });
+      return;
+    }
+
+    if (!historyId) {
+      res.status(400).json({
+        error: "O id do histório é obrigatório.",
+      });
+      return;
+    }
+
+    const user = await UserModel.findOne({ username: req.headers.username });
+
+    if (!user) {
+      res.status(401).json({ error: "Usuário não encontrado." });
+      return;
+    }
+
+    const activeIndex = user.actives.findIndex(
+      (active) => active._id?.toString() === activeId
+    );
+
+    if (activeIndex === -1) {
+      res.status(404).json({ error: "Ativo não encontrado." });
+      return;
+    }
+
+    const historyIndex = user.actives[activeIndex].history.findIndex(
+      (history) => history._id?.toString() === historyId
+    );
+
+    if (historyIndex === -1) {
+      res.status(404).json({ error: "Histórico não encontrado." });
+      return;
+    }
+
+    user.actives[activeIndex].history.splice(historyIndex, 1);
+    user.actives[activeIndex].history = reordenateAndRecalculateHistory(
+      user.actives[activeIndex].history
+    );
+
+    user.markModified("actives");
+
+    await user.save();
+    res.status(200).send();
+  } catch (err) {
+    if (err instanceof Error) {
+      console.error(err);
+      res.status(500).json({ error: err });
+      return;
+    }
+
+    console.error(err);
+    res.status(500).json({ error: "Erro no servidor." });
+  }
+};
+
+const calculatePercentil = (value: number, lastValue: number): number => {
+  return Number(((value / lastValue) * 100 - 100).toFixed(2));
+};
+
+const reordenateAndRecalculateHistory = (
+  history: Array<ActiveHistorySchema>
+): Array<ActiveHistorySchema> => {
+  history = history.sort(
+    (a, b) =>
+      new Date(a.incomeDate).getTime() - new Date(b.incomeDate).getTime()
+  );
+
+  for (let i = 0; i < history.length; i++) {
+    const lastValue = history?.[i - 1]?.value;
+    const value = history?.[i]?.value;
+
+    history[i].variation =
+      lastValue == undefined || value == undefined
+        ? 0
+        : calculatePercentil(value, lastValue);
+  }
+
+  return history;
+};
+
+const upsertActiveHistory = async ({
+  username,
+  activeId,
+  history,
+}: {
+  username: string;
+  activeId: string;
+  history: ActiveHistorySchema;
+}): Promise<ActiveHistorySchema> => {
+  try {
+    const user = await UserModel.findOne({ username });
+    if (!user) throw new Error("Usuário não encontrado.");
+
+    const activeIndex = user.actives.findIndex(
+      (active) => active._id?.toString() === activeId
+    );
+
+    if (activeIndex === -1) throw new Error("Ativo não encontrado.");
+
+    const active = user.actives[activeIndex];
+    const isUpdate = history._id !== undefined;
+    const historyIndex = active.history.findIndex(
+      (h) => h._id?.toString() === history._id
+    );
+
+    if (isUpdate && historyIndex === -1)
+      throw new Error("Histórico não encontrado.");
+
+    if (isUpdate) {
+      active.history[historyIndex].value = history.value;
+      active.history[historyIndex].incomeDate = history.incomeDate;
+      user.actives[activeIndex] = active;
+    } else {
+      history._id = new Types.ObjectId().toString();
+      active.history.push(history);
+    }
+
+    active.history = reordenateAndRecalculateHistory(active.history);
+    user.markModified("actives");
+    await user.save();
+
+    const updatedHistory = active.history.find(
+      (h) => h._id?.toString() === history._id
+    );
+
+    return updatedHistory ?? history;
+  } catch (err) {
+    console.error(err);
+    throw new Error("Erro no servidor.");
   }
 };

@@ -1,11 +1,10 @@
 import { Schema } from "mongoose";
 
 export type ActiveHistorySchema = {
-  _id?: string;
-
-  value: number;
-  variation: number;
-  incomeDate: Date;
+  _id?: string; // ID usado para update/delete
+  value: number; // Valor da movimentação do histórico
+  variation: number; // Variação em relação ao histórico anterior
+  incomeDate: Date; // Data da variação
 };
 
 export const activeHistorySchema = new Schema<ActiveHistorySchema>({

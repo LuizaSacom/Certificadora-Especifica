@@ -11,14 +11,13 @@ export enum ActiveTypeSchema {
 }
 
 export type ActiveSchema = {
-  _id?: string;
-  type: ActiveTypeSchema;
-  title: string;
-  shares: number;
-  balance: number;
-  variation: number;
-  value_per_share: number;
-  history: ActiveHistorySchema[];
+  _id?: string; // ID usado para requisições de update e delete
+  type: ActiveTypeSchema; // Tipo de ativo, podendo ser FFI, EFT, ACTION, CRIPTO, FIXED_INCOME ou OTHER
+  title: string; // Titulo
+  shares: number; // Cotas do ativo
+  balance: number; // Cotas do ativo * valor da cota
+  value_per_share: number; // Valor da cota
+  history: ActiveHistorySchema[]; // Histório
 };
 
 export const activeSchema = new Schema<ActiveSchema>(
@@ -36,10 +35,6 @@ export const activeSchema = new Schema<ActiveSchema>(
       required: true,
     },
     balance: {
-      type: Number,
-      required: true,
-    },
-    variation: {
       type: Number,
       required: true,
     },

@@ -41,15 +41,21 @@ userSchema.set("toJSON", {
     delete ret.__v;
     delete ret._id;
 
-    ret.active = ret.actives.map((active: any) => {
+    ret.actives = ret.actives.map((active: any) => {
       active.id = active._id;
       delete active._id;
 
-      active.history = active.history.map((history: any) => {
-        history.id = history._id;
-        delete history._id;
+      active.history = active.history.map((h: any) => {
+        h.id = h._id;
+        delete h._id;
+
+        return h;
       });
+
+      return active;
     });
+
+    return ret;
   },
 });
 
