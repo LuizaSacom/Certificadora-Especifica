@@ -8,7 +8,10 @@ import {
 } from "./presentation/controllers/UserController";
 import { activeRoutes } from "./presentation/routes/ActiveRoutes";
 
+const cors = require('cors');
 const app = express();
+
+app.use(cors());
 
 mongoose
   .connect(environments.MONGO_URL, {
