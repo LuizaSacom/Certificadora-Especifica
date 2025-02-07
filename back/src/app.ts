@@ -2,7 +2,10 @@ import express from "express";
 import mongoose from "mongoose";
 import { environments } from "./constants/environments";
 import { login } from "./presentation/controllers/AuthController";
-import { register } from "./presentation/controllers/UserController";
+import {
+  register,
+  resetPassword,
+} from "./presentation/controllers/UserController";
 import { activeRoutes } from "./presentation/routes/ActiveRoutes";
 
 const app = express();
@@ -20,6 +23,7 @@ mongoose
 
 app.use(express.json());
 app.post("/users", register);
+app.post("/users/reset-password", resetPassword);
 app.post("/login", login);
 app.use("/actives", activeRoutes);
 
