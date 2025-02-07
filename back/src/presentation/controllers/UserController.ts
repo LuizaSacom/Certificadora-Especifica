@@ -8,21 +8,27 @@ import Mail from "nodemailer/lib/mailer";
 
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { username, password } = req.body;
+    const { email, username, password } = req.body;
 
-    if (!username || !password) {
-      res.status(400).json({ error: "Username e senha são obrigatórios." });
+    if (!email || !username || !password) {
+      res
+        .status(400)
+        .json({ error: "E-mail, username e senha são obrigatórios." });
       return;
     }
 
-    const existingUser = await UserModel.findOne({ username });
-    if (existingUser) {
-      res.status(400).json({ error: "O nome de usuário já está em uso." });
+    const existingUserName = await UserModel.findOne({ username });
+    const existingUserEmail = await UserModel.findOne({ email });
+    if (existingUserName || existingUserEmail) {
+      res
+        .status(400)
+        .json({ error: "O e-mail/nome de usuário já está em uso." });
       return;
     }
 
     const hashedPassword = await argon2.hash(password);
     await UserModel.create({
+      email,
       username,
       password: password,
       salt: hashedPassword,

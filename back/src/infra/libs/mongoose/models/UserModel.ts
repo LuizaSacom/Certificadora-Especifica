@@ -4,6 +4,7 @@ import mongoose, { Document, Schema } from "mongoose";
 export type UserSchema = {
   id: Schema.Types.ObjectId;
   salt: string;
+  email: string;
   actives: ActiveSchema[];
   username: string;
   password: string;
@@ -14,6 +15,11 @@ export type UserSchema = {
 const userSchema = new Schema(
   {
     username: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    email: {
       type: String,
       required: true,
       unique: true,
