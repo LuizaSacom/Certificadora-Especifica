@@ -46,7 +46,7 @@ export const resetPassword = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { email } = req.query as { email: string };
+    const { email } = req.body;
 
     if (!email) {
       res.status(400).json({
