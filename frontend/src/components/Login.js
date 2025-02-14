@@ -28,6 +28,7 @@ const Login = () => {
 
       if (response.ok) {
         localStorage.setItem('token', result.token);
+        localStorage.setItem('username', username);
         navigate('/dashboard');  
       } else {
         setError(result.message || 'Erro ao processar a solicitação');
