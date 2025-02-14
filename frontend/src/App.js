@@ -4,6 +4,7 @@ import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 import ForgotPassword from './components/ForgotPassword';
 import Register from './components/Register';
+import CreateActive from './components/CreateActive';
 import PrivateRoute from './components/PrivateRoute';
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
 
       <Route element={<PrivateRoute />}>
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/create-active" element={<CreateActive />} />
       </Route>
 
       <Route path="/forgot-password" element={<ForgotPassword />} />
