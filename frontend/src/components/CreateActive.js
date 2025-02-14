@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Box, Typography, TextField, Button, MenuItem, Select, InputLabel, FormControl, CircularProgress } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios'; // Importando axios
 
 function CreateActive() {
     const navigate = useNavigate();
@@ -9,6 +10,7 @@ function CreateActive() {
     const [shares, setShares] = useState('');
     const [valuePerShare, setValuePerShare] = useState('');
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(''); // Para exibir erros
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -23,17 +25,30 @@ function CreateActive() {
         };
 
         try {
-            setLoading(false);
-            navigate('/');
+            // Substitua a URL abaixo pela URL da sua API
+            const response = await axios.post('http://localhost:3000/actives', newActive, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}` // Supondo que você use um token JWT
+                }
+            });
+
+            // Verificando se o ativo foi cadastrado com sucesso
+            if (response.status === 201) {
+                navigate('/'); // Redireciona para a página inicial
+            }
         } catch (error) {
-            setLoading(false);
             console.error('Erro ao cadastrar ativo', error);
+            setError('Erro ao cadastrar ativo. Tente novamente!');
+        } finally {
+            setLoading(false);
         }
     };
 
     return (
         <Box sx={{ padding: 4, backgroundColor: '#f5f5f5', minHeight: '100vh' }}>
             <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 2 }}>Cadastrar Novo Ativo</Typography>
+
+            {error && <Typography color="error" sx={{ mb: 2 }}>{error}</Typography>} {/* Exibe a mensagem de erro */}
 
             <form onSubmit={handleSubmit}>
                 <FormControl fullWidth sx={{ mb: 2 }}>
@@ -44,9 +59,12 @@ function CreateActive() {
                         label="Tipo de Ativo"
                         required
                     >
-                        {Object.values().map((type) => (
-                            <MenuItem key={type} value={type}>{type}</MenuItem>
-                        ))}
+                        <MenuItem value="FFI">FFI</MenuItem>
+                        <MenuItem value="EFT">EFT</MenuItem>
+                        <MenuItem value="ACTION">ACTION</MenuItem>
+                        <MenuItem value="CRIPTO">CRIPTO</MenuItem>
+                        <MenuItem value="FIXED_INCOME">FIXED_INCOME</MenuItem>
+                        <MenuItem value="OTHER">OTHER</MenuItem>
                     </Select>
                 </FormControl>
 
