@@ -24,11 +24,21 @@ function Dashboard() {
     const fetchActives = async () => {
       setLoading(true);
       try {
-        const response = await axios.get('/api/actives', {
+        // Recupera o token armazenado no localStorage
+        const token = localStorage.getItem('token');
+        if (!token) {
+          setError('Token não encontrado. Por favor, faça login novamente.');
+          setLoading(false);
+          return;
+        }
+
+        const response = await axios.get('http://localhost:3000/actives', {
           headers: {
-            username: username,
+            'Authorization': `Bearer ${token}`, // Adiciona o token ao cabeçalho
+            'username': username, // Continua enviando o username
           },
         });
+
         setActives(response.data);
         setLoading(false);
       } catch (err) {
@@ -38,7 +48,7 @@ function Dashboard() {
     };
 
     if (username) {
-      fetchActives();
+      fetchActives(username);
     }
   }, [username]);
 
@@ -100,7 +110,7 @@ function Dashboard() {
   };
 
   return (
-    <Box sx={{ padding: 4, backgroundColor: '#f5f5f5', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <Box sx={{ backgroundColor: '#f5f5f5', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <Box sx={{ backgroundColor: '#9762FF', padding: 3, borderRadius: 2, mb: 3, display: 'flex', alignItems: 'center' }}>
         <Typography variant="h4" sx={{ color: 'white', fontWeight: 'bold', flexGrow: 1 }}>
           Bem-vindo(a), {username || 'Usuário'}
@@ -179,12 +189,14 @@ function Dashboard() {
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
                 Gráfico de Pizza
               </Typography>
-              <Pie data={generatePieChartData()} options={{ responsive: true }} height={180} />
+              <Box sx={{ height: '400px', width: '100%' }}>
+                <Pie data={generatePieChartData()} options={{ responsive: true }} />
+              </Box>
             </>
           )}
         </Box>
 
-        <Box sx={{ width: '48%', mb: 2 }}>
+        <Box sx={{ height: '400px', width: '48%', mb: 2 }}>
           {!loading && actives.length > 0 && (
             <>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
