@@ -34,7 +34,7 @@ function CreateActive() {
 
             // Verificando se o ativo foi cadastrado com sucesso
             if (response.status === 201) {
-                navigate('/'); // Redireciona para a página inicial
+                navigate('/dashboard'); // Redireciona para a página inicial
             }
         } catch (error) {
             console.error('Erro ao cadastrar ativo', error);
