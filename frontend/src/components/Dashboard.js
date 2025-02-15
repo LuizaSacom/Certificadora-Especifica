@@ -110,7 +110,7 @@ function Dashboard() {
   };
 
   return (
-    <Box sx={{ backgroundColor: '#f5f5f5', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <Box sx={{ backgroundColor: '#f5f5f5', padding: 3, minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <Box sx={{ backgroundColor: '#9762FF', padding: 3, borderRadius: 2, mb: 3, display: 'flex', alignItems: 'center' }}>
         <Typography variant="h4" sx={{ color: 'white', fontWeight: 'bold', flexGrow: 1 }}>
           Bem-vindo(a), {username || 'Usuário'}
@@ -189,7 +189,7 @@ function Dashboard() {
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
                 Gráfico de Pizza
               </Typography>
-              <Box sx={{ height: '400px', width: '100%' }}>
+              <Box sx={{ height: '500px', width: '100%' }}>
                 <Pie data={generatePieChartData()} options={{ responsive: true }} />
               </Box>
             </>
