@@ -322,6 +322,11 @@ export const deleteActiveHistory = async (
     }
 
     user.actives[activeIndex].history.splice(historyIndex, 1);
+    user.actives[activeIndex].shares = user.actives[activeIndex].history.length;
+    let newBalance = 0;
+    user.actives[activeIndex].history.forEach((h) => (newBalance += h.value));
+
+    user.actives[activeIndex].balance = newBalance;
     user.actives[activeIndex].history = reordenateAndRecalculateHistory(
       user.actives[activeIndex].history
     );
@@ -402,6 +407,13 @@ const upsertActiveHistory = async ({
     } else {
       history._id = new Types.ObjectId().toString();
       active.history.push(history);
+
+      user.actives[activeIndex].shares =
+        user.actives[activeIndex].history.length;
+      let newBalance = 0;
+      user.actives[activeIndex].history.forEach((h) => (newBalance += h.value));
+
+      user.actives[activeIndex].balance = newBalance;
     }
 
     active.history = reordenateAndRecalculateHistory(active.history);
