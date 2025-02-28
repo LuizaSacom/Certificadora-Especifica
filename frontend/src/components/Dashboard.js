@@ -133,24 +133,6 @@ function Dashboard() {
 
       console.log("Resposta do backend:", response.data); // Log para depuração
 
-      // const formatedActives = actives.map((ac) => {
-      //   if (ac.id === id) {
-      //     ac.history = [
-      //       ...ac.history,
-      //       {
-      //         id: response._id,
-      //         value: newBalanceAmount,
-      //         variation: response.variation,
-      //         incomeDate: newBalanceDate,
-      //       },
-      //     ];
-      //   }
-
-      //   return ac;
-      // });
-
-      // // Atualiza o estado local
-      // setActives(formatedActives);
       await fetchActives();
 
       setNewBalanceDate("");
@@ -194,12 +176,56 @@ function Dashboard() {
     };
   };
 
+  const getRandomColor = () => {
+    const letters = "0123456789ABCDEF";
+    let color = "#";
+    for (let i = 0; i < 6; i++) {
+      color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+  };
+
+  const generateGeneralChartData = () => {
+    const labels = [
+      "Jan",
+      "Fev",
+      "Mar",
+      "Abr",
+      "Mai",
+      "Jun",
+      "Jul",
+      "Ago",
+      "Set",
+      "Out",
+      "Nov",
+      "Dez",
+    ];
+
+    const datasets = actives.map((active) => {
+      const color = getRandomColor();
+      return {
+        label: active.title,
+        data: labels.map((_, monthIndex) => {
+          // Encontra os valores correspondentes para o mês
+          const historyEntry = active.history.find(
+            (h) => new Date(h.incomeDate).getMonth() === monthIndex
+          );
+          return historyEntry ? historyEntry.value : 0; // Usa 0 para meses sem dados
+        }),
+        borderColor: color,
+        backgroundColor: color,
+        fill: true,
+      };
+    });
+
+    return {
+      labels,
+      datasets: datasets,
+    };
+  };
+
   const deleteActiveHistory = async (historyId, activeId) => {
     const token = localStorage.getItem("token"); // Recupera o token do localStorage
-
-    console.log("activeId", activeId);
-    console.log("historyId", historyId);
-
     if (!token) {
       setError("Token não encontrado. Por favor, faça login novamente.");
       return;
@@ -388,6 +414,35 @@ function Dashboard() {
         </DialogActions>
       </Dialog>
 
+      <Box sx={{ flex: 1, mt: 1 }}>
+        <Grid item xs={12} sm={4}>
+          {/* Histórico de Linha */}
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold" }}>
+              Histórico Geral
+            </Typography>
+            <Box sx={{ height: "400px", width: "100%" }}>
+              <Line
+                data={generateGeneralChartData()}
+                options={{ responsive: true }}
+                height={180}
+              />
+            </Box>
+          </Box>
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold" }}>
+              Histórico Geral
+            </Typography>
+            <Box sx={{ height: "400px", width: "100%" }}>
+              <Bar
+                data={generateGeneralChartData()}
+                options={{ responsive: true }}
+                height={180}
+              />
+            </Box>
+          </Box>
+        </Grid>
+      </Box>
       {/* Gráficos */}
       <Box sx={{ flex: 1, mt: 1 }}>
         {/* Gráficos */}
@@ -431,30 +486,6 @@ function Dashboard() {
                     </Typography>
                     <Box sx={{ height: "400px", width: "100%" }}>
                       <Bar
-                        data={generateChartData(active.history)}
-                        options={{ responsive: true }}
-                        height={180}
-                      />
-                    </Box>
-                  </Box>
-                </Grid>
-              )
-          )}
-          {actives.map(
-            (active) =>
-              active.history.length > 0 && (
-                <Grid id={active.id} item xs={12} sm={4} key={active._id}>
-                  {/* Histórico de Pizza */}
-                  <Box sx={{ mb: 3 }}>
-                    <Typography
-                      variant="h6"
-                      gutterBottom
-                      sx={{ fontWeight: "bold" }}
-                    >
-                      Histórico de {active.title}
-                    </Typography>
-                    <Box sx={{ height: "400px", width: "100%" }}>
-                      <Pie
                         data={generateChartData(active.history)}
                         options={{ responsive: true }}
                         height={180}
